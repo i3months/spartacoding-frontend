@@ -2,6 +2,7 @@ import { TextField, Button } from '@mui/material';
 import { Dispatch } from 'react';
 import { Todo } from '../types/todo';
 import { useTodoForm } from '../hooks/use-todo-form';
+import { isAfter } from 'date-fns';
 
 export const TodoForm = ({
   todos,
@@ -12,6 +13,7 @@ export const TodoForm = ({
 }) => {
   const { initForm, updateDeadline, updateTodo, todo, deadline } =
     useTodoForm();
+  const MAX_TODO_LENGTH = 100;
 
   const handleAddTodo = () => {
     if (!(todo.trim() && deadline)) return;
@@ -33,6 +35,9 @@ export const TodoForm = ({
       <TextField
         label="New Todo"
         variant="outlined"
+        inputProps={{
+          'data-testid': 'todo-form-text',
+        }}
         fullWidth
         value={todo}
         onChange={(e) => updateTodo(e.target.value)}
@@ -41,6 +46,9 @@ export const TodoForm = ({
       <TextField
         label="Deadline"
         type="date"
+        inputProps={{
+          'data-testid': 'todo-form-deadline',
+        }}
         InputLabelProps={{ shrink: true }}
         fullWidth
         value={deadline}
@@ -53,9 +61,15 @@ export const TodoForm = ({
       <Button
         variant="contained"
         color="primary"
+        data-testid="todo-form-button"
         onClick={handleAddTodo}
         fullWidth
-        disabled={!todo.trim() || !deadline}
+        disabled={
+          !(todo.trim().length <= MAX_TODO_LENGTH) ||
+          !deadline ||
+          new Date(deadline).getTime() <=
+            new Date(new Date().setHours(0, 0, 0, 0)).getTime()
+        }
       >
         Add Todo
       </Button>
